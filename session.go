@@ -34,9 +34,6 @@ type LogWarnf interface {
 type Session struct {
 	*http.Transport
 	*http.Client
-	// headers map[string]string
-	// cookie  map[string]string
-	// retry   int
 	option  *Request
 	LogFunc func(string, ...interface{})
 	errs    chan error
@@ -55,7 +52,7 @@ func New() *Session {
 	return &Session{
 		Transport: tr,
 		Client: &http.Client{
-			Timeout:   120 * time.Second,
+			Timeout:   10 * time.Second,
 			Transport: tr,
 			Jar:       jar,
 		},
@@ -159,10 +156,11 @@ func (sess *Session) SetKeepAlives(keepAlives bool) *Session {
 // DoRequest send a request and return a response
 func (sess *Session) DoRequest(request *Request) (*Response, error) {
 	request.MergeIn(sess.option)
+	var req *http.Request
 	var resp *http.Response
 	var err error
 	for i := 0; i <= request.Retry; i++ {
-		req, err := request.Request()
+		req, err = request.Request()
 		if err != nil {
 			return nil, err
 		}
