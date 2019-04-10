@@ -159,12 +159,13 @@ func (sess *Session) SetKeepAlives(keepAlives bool) *Session {
 // DoRequest send a request and return a response
 func (sess *Session) DoRequest(request *Request) (*Response, error) {
 	request.MergeIn(sess.option)
-	req, err := request.Request()
-	if err != nil {
-		return nil, err
-	}
-	resp, err := sess.Client.Do(req) // do request
-	for i := 1; i <= request.Retry; i++ {
+	var resp *http.Response
+	var err error
+	for i := 0; i <= request.Retry; i++ {
+		req, err := request.Request()
+		if err != nil {
+			return nil, err
+		}
 		if resp, err = sess.Client.Do(req); err == nil {
 			break
 		}

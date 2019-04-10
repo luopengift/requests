@@ -27,7 +27,7 @@ func Test_Get(t *testing.T) {
 
 func Test_Post(t *testing.T) {
 	sess := requests.New()
-	req := requests.NewRequest("POST", "http://httpbin.org/post", nil)
+	req := requests.NewRequest("POST", "http://httpbin.org/post", nil).SetRetry(3)
 	req.SetParams(map[string]interface{}{
 		"a": "b",
 		"c": 3,

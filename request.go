@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 // Request request
@@ -18,7 +17,7 @@ type Request struct {
 	Params  map[string]interface{}
 	Headers map[string]string
 	Cookies map[string]string
-	Body    io.Reader
+	Body    []byte
 	Retry   int
 }
 
@@ -30,8 +29,8 @@ func NewRequest(method, url string, body io.Reader) *Request {
 		Params:  make(map[string]interface{}),
 		Headers: make(map[string]string),
 		Cookies: make(map[string]string),
-		Body:    body,
 	}
+	req.SetBody(body)
 	return req
 }
 
@@ -68,17 +67,21 @@ func (req *Request) SetBody(body interface{}) error {
 	}
 	switch v := body.(type) {
 	case string:
-		req.Body = strings.NewReader(v)
+		req.Body = []byte(v)
 	case []byte:
-		req.Body = bytes.NewReader(v)
-	case io.Reader:
 		req.Body = v
+	case io.Reader:
+		var b bytes.Buffer
+		if _, err := b.ReadFrom(v); err != nil {
+			return err
+		}
+		req.Body = b.Bytes()
 	default:
 		b, err := json.Marshal(v)
 		if err != nil {
 			return err
 		}
-		req.Body = bytes.NewReader(b)
+		req.Body = b
 	}
 	return nil
 }
@@ -147,7 +150,7 @@ func (req *Request) MergeIn(r *Request) {
 
 // Request request
 func (req *Request) Request() (*http.Request, error) {
-	request, err := http.NewRequest(req.Method, req.URL, req.Body)
+	request, err := http.NewRequest(req.Method, req.URL, bytes.NewReader(req.Body))
 	if err != nil {
 		return nil, err
 	}
