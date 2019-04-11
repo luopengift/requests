@@ -154,7 +154,7 @@ func (sess *Session) SetKeepAlives(keepAlives bool) *Session {
 }
 
 // DoRequest send a request and return a response
-func (sess *Session) DoRequest(request *Request) (*Response, error) {
+func (sess *Session) DoRequest(request *Request, ctx ...context.Context) (*Response, error) {
 	request.MergeIn(sess.option)
 	var req *http.Request
 	var resp *http.Response
@@ -164,31 +164,15 @@ func (sess *Session) DoRequest(request *Request) (*Response, error) {
 		if err != nil {
 			return nil, err
 		}
+		if len(ctx) != 0 {
+			req = req.WithContext(ctx[0]) // !!! WithContext returns a shallow copy of r with its context changed to ctx
+		}
 		if resp, err = sess.Client.Do(req); err == nil {
 			break
 		}
 		sess.LogFunc("retry %v, err=%v", i, err)
 	}
 	return WarpResponse(resp), err
-}
-
-// DoRequestWithContext Do with context
-func (sess *Session) DoRequestWithContext(ctx context.Context, request *Request) (*Response, error) {
-	request.MergeIn(sess.option)
-	req, err := request.Request()
-	if err != nil {
-		return nil, err
-	}
-	req2 := req.WithContext(ctx)      // !!! WithContext returns a shallow copy of r with its context changed to ctx
-	resp, err := sess.Client.Do(req2) // do request
-	for i := 1; i <= request.Retry; i++ {
-		if resp, err = sess.Client.Do(req); err == nil {
-			break
-		}
-		sess.LogFunc("retry %v, err=%v", i, err)
-	}
-	return WarpResponse(resp), err
-
 }
 
 // Do http request
@@ -200,7 +184,7 @@ func (sess *Session) Do(method, url, contentType string, body io.Reader) (*Respo
 // DoWithContext http request
 func (sess *Session) DoWithContext(ctx context.Context, method, url, contentType string, body io.Reader) (*Response, error) {
 	req := NewRequest(method, url, body).SetHeader("Content-Type", contentType)
-	return sess.DoRequestWithContext(ctx, req)
+	return sess.DoRequest(req, ctx)
 }
 
 // Get send get request
