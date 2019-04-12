@@ -128,18 +128,18 @@ func (req *Request) SetRetry(retry int) *Request {
 
 // MergeIn merge r into req
 func (req *Request) MergeIn(r *Request) {
-	for k, v := range req.Params {
-		if _, ok := r.Params[k]; !ok {
+	for k, v := range r.Params {
+		if _, ok := req.Params[k]; !ok {
 			req.Params[k] = v
 		}
 	}
-	for k, v := range req.Headers {
-		if _, ok := r.Headers[k]; !ok {
+	for k, v := range r.Headers {
+		if _, ok := req.Headers[k]; !ok {
 			req.Headers[k] = v
 		}
 	}
-	for k, v := range req.Cookies {
-		if _, ok := r.Cookies[k]; !ok {
+	for k, v := range r.Cookies {
+		if _, ok := req.Cookies[k]; !ok {
 			req.Cookies[k] = v
 		}
 	}
