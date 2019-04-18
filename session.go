@@ -22,11 +22,6 @@ var (
 	ErrEmptyProxy = errors.New("proxy is empty")
 )
 
-// LogWarnf log interface
-type LogWarnf interface {
-	Warnf(string, ...interface{})
-}
-
 // Session httpclient session
 // Clients and Transports are safe for concurrent use by multiple goroutines
 // for efficiency should only be created once and re-used.
@@ -170,7 +165,9 @@ func (sess *Session) DoRequest(request *Request, ctx ...context.Context) (*Respo
 		if resp, err = sess.Client.Do(req); err == nil {
 			break
 		}
-		sess.LogFunc("retry %v, err=%v", i, err)
+		if i != 0 {
+			sess.LogFunc("retry[%d/%d], err=%v", i, request.Retry, err)
+		}
 	}
 	return WarpResponse(resp), err
 }
