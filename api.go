@@ -24,7 +24,6 @@ func Post(url, contentType string, body interface{}) (*Response, error) {
 		return nil, err
 	}
 	return sess.DoRequest(req)
-
 }
 
 // PUT send post request
@@ -43,7 +42,6 @@ func Delete(url string, body interface{}) (resp *Response, err error) {
 		return nil, err
 	}
 	return sess.DoRequest(req)
-
 }
 
 // Head send post request
