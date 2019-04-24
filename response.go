@@ -7,7 +7,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/luopengift/framework/pkg/encoding/json"
+	"github.com/golang-io/pkg/encoding/json"
 )
 
 // Response wrap std response
