@@ -45,3 +45,23 @@ func Test_Post(t *testing.T) {
 	}
 	fmt.Println(resp.Text())
 }
+
+func Test_FormPost(t *testing.T) {
+	sess := requests.New()
+	req := requests.NewRequest("POST", "http://httpbin.org/post", nil).SetRetry(3)
+	req.SetParams(map[string]interface{}{
+		"a": "b",
+		"c": 3,
+		"d": []int{1, 2, 3},
+	})
+
+	req.SetForm("name", "12@xx.com")
+	// req.SetHeader("Content-Type", "application/json")
+	resp, err := sess.DoRequest(req)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	fmt.Println(resp.Text())
+
+}

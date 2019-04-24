@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // Request request
@@ -18,17 +19,19 @@ type Request struct {
 	Headers map[string]string
 	Cookies map[string]string
 	Body    []byte
+	Form    url.Values
 	Retry   int
 }
 
 // NewRequest new request
-func NewRequest(method, url string, body io.Reader) *Request {
+func NewRequest(method, urlstr string, body io.Reader) *Request {
 	req := &Request{
 		Method:  method,
-		URL:     url,
+		URL:     urlstr,
 		Params:  make(map[string]interface{}),
 		Headers: make(map[string]string),
 		Cookies: make(map[string]string),
+		Form:    make(url.Values),
 	}
 	req.SetBody(body)
 	return req
@@ -84,6 +87,13 @@ func (req *Request) SetBody(body interface{}) error {
 		req.Body = b
 	}
 	return nil
+}
+
+// SetForm set form, content-type is
+func (req *Request) SetForm(k, v string) *Request {
+	req.SetHeader("content-type", "application/x-www-form-urlencoded")
+	req.Form.Add(k, v)
+	return req
 }
 
 // SetHeader header
@@ -150,7 +160,13 @@ func (req *Request) MergeIn(r *Request) {
 
 // Request request
 func (req *Request) Request() (*http.Request, error) {
-	request, err := http.NewRequest(req.Method, req.URL, bytes.NewReader(req.Body))
+	var body io.Reader
+	if len(req.Form) != 0 && len(req.Body) == 0 {
+		body = strings.NewReader(req.Form.Encode())
+	} else {
+		body = bytes.NewReader(req.Body)
+	}
+	request, err := http.NewRequest(req.Method, req.URL, body)
 	if err != nil {
 		return nil, err
 	}
