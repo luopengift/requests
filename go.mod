@@ -3,6 +3,7 @@ module github.com/luopengift/requests
 go 1.12
 
 require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang-io/pkg v0.0.0-20190424092429-486169a6c3e1
 	github.com/json-iterator/go v1.1.6 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

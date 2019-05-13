@@ -28,11 +28,11 @@ func newResponse() *Response {
 func (resp *Response) getBody() error {
 	var err error
 	resp.once.Do(func() {
-		if resp == nil {
+		if resp.Response == nil {
 			return
 		}
-		defer resp.Body.Close()
-		_, err = resp.body.ReadFrom(resp.Body)
+		defer resp.Response.Body.Close()
+		_, err = resp.body.ReadFrom(resp.Response.Body)
 	})
 	return err
 }
